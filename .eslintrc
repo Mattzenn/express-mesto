@@ -1,0 +1,5 @@
+{
+  "extends": "airbnb-base",
+  "enforceInMethodNames": false,
+  "allowFunctionParams": true
+}
