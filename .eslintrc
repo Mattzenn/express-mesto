@@ -1,5 +1,6 @@
 {
   "extends": "airbnb-base",
-  "enforceInMethodNames": false,
-  "allowFunctionParams": true
+  "rules": {
+    "no-underscore-dangle": ["off", {"allow": ["id"]}]
+  }
 }
