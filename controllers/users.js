@@ -40,16 +40,12 @@ const updateUser = (req, res) => {
   const { name, about } = req.body;
   const userId = req.user._id;
 
-  console.log(userId);
-  console.log(name);
-  console.log(about);
-
   User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Пользователь с таким id не найден' }))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      if (err.name === 'ValidationError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
@@ -64,8 +60,8 @@ const updateAvatar = (req, res) => {
     .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Пользователь с таким id не найден' }))
     .then((avatardata) => res.send({ data: avatardata }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении аватара' });
+      if (err.name === 'ValidationError') {
+        res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
       } else {
         res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
       }
