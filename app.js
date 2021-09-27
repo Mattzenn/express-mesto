@@ -1,38 +1,53 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const { loginValidation, userValidation } = require('./middlewares/validate');
 
 const app = express();
-const { ERR_NOT_FOUND } = require('./errors/errors');
+const NotFound = require('./errors/NotFound');
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '613efc004df259cdcf1be4af',
-  };
+app.use(cookieParser());
 
-  next();
-});
+app.post('/signup', userValidation, createUser);
+app.post('/signin', loginValidation, login);
 
-app.use(usersRouter);
+app.use('/', auth, usersRouter);
 
-app.use(cardsRouter);
+app.use('/', auth, cardsRouter);
 
-app.use('*', (req, res) => {
-  res.status(ERR_NOT_FOUND).send({ message: 'Запрашиваемый ресурс не найден' });
+app.use('*', () => {
+    throw new NotFound('Запрашиваемый ресурс не найден');
 });
 
 // подключаемся к серверу mongo
+app.use(errors());
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+app.use((err, req, res, next) => {
+    const { statusCode = 500, message } = err;
+
+    res
+        .status(statusCode)
+        .send({
+            message: statusCode === 500 ?
+                'На сервере произошла ошибка' : message,
+        });
+    next();
+});
+
+mongoose.connect('mongodb://localhost:27017/mestodbnew');
 
 app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listeningnpm run dev  on port ${PORT}`);
+    // Если всё работает, консоль покажет, какой порт приложение слушает
+    console.log(`App listeningnpm run dev  on port ${PORT}`);
 });
