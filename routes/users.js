@@ -1,7 +1,6 @@
 const { Router } = require('express');
-const {
-  getUsers, getUserById, updateUser, updateAvatar, getCurrentUser,
-} = require('../controllers/users');
+// eslint-disable-next-line object-curly-newline
+const { getUsers, getUserById, updateUser, updateAvatar, getCurrentUser } = require('../controllers/users');
 const { userAboutValidation, avatarValidation, idValidation } = require('../middlewares/validate');
 
 const usersRouter = Router();

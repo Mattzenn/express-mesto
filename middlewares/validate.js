@@ -1,6 +1,15 @@
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
 
-const linkRegExp = /(http:\/\/|https:\/\/)(www)*[a-z0-9\-\.\_\~\:\/\?\#\[\]\@\!\$\&\'\(\)\*\+\,\;\=]+#*/;
+const method = (value) => {
+  const result = validator.isURL(value);
+  if (result) {
+    return value;
+  // eslint-disable-next-line no-else-return
+  } else {
+    throw new Error('URL validation err');
+  }
+};
 
 const idValidation = celebrate({
   params: Joi.object().keys({
@@ -19,7 +28,7 @@ const userValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(20),
-    avatar: Joi.string().required().pattern(linkRegExp),
+    avatar: Joi.string().custom(method),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -28,7 +37,7 @@ const userValidation = celebrate({
 const cardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().pattern(linkRegExp),
+    link: Joi.string().required().custom(method),
   }),
 });
 
@@ -41,7 +50,7 @@ const userAboutValidation = celebrate({
 
 const avatarValidation = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(linkRegExp),
+    avatar: Joi.string().custom(method),
   }),
 });
 
@@ -52,5 +61,4 @@ module.exports = {
   avatarValidation,
   loginValidation,
   idValidation,
-  linkRegExp,
 };

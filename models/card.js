@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-const { linkRegExp } = require('../middlewares/validate');
+const { isURL } = require('validator');
 
 const cardSchema = new Schema({
   name: {
@@ -13,9 +13,8 @@ const cardSchema = new Schema({
     required: true,
     validate: {
       validator(link) {
-        return linkRegExp.test(link);
+        return isURL(link);
       },
-      message: 'Здесь должна быть ссылка',
     },
   },
   owner: {

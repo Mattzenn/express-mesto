@@ -4,6 +4,7 @@ const User = require('../models/user');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Conflict = require('../errors/Conflict');
+// const Default = require('../errors/Default');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -22,28 +23,26 @@ const getUserById = (req, res, next) => {
 
 const createUser = (req, res, next) => {
   const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
+    name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    }))
-    .then((user) => res.send({
-      data: {
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-      },
-    }))
+
+  return User.findOne({ email })
+    .then((admin) => {
+      if (admin) {
+        next(new Conflict('Пользователь с таким email уже существует'));
+      }
+      bcrypt.hash(password, 10)
+        // eslint-disable-next-line object-curly-newline
+        .then((hash) => User.create({ name, about, avatar, email, password: hash }))
+        .then((user) => res.send({
+          data: {
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        }));
+    })
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {
         throw new Conflict('Пользователь с таким email уже существует');
